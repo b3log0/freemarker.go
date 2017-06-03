@@ -383,16 +383,12 @@ func (s *state) walkRange(dot reflect.Value, r *parse.ListNode) {
 func (s *state) evalCommand(dot reflect.Value, cmd *parse.ExpressionNode) reflect.Value {
 	firstWord := cmd.Nodes[0]
 	switch n := firstWord.(type) {
-	case *parse.ChainNode:
-		//		return s.evalChainNode(dot, n, cmd.Args, final)
 	case *parse.IdentifierNode:
 		// Must be a function.
 		//		return s.evalFunction(dot, n, cmd, cmd.Args, final)
 	case *parse.ExpressionNode:
 		// Parenthesized pipeline. The arguments are all inside the pipeline; final is ignored.
 		return s.evalCommand(dot, n)
-	case *parse.VariableNode:
-		//		return s.evalVariableNode(dot, n, cmd.Args, final)
 	}
 
 	s.at(firstWord)
@@ -441,30 +437,6 @@ func (s *state) idealConstant(constant *parse.NumberNode) reflect.Value {
 
 func isHexConstant(s string) bool {
 	return len(s) > 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')
-}
-
-func (s *state) evalChainNode(dot reflect.Value, chain *parse.ChainNode, args []parse.Node, final reflect.Value) reflect.Value {
-	s.at(chain)
-	if len(chain.Field) == 0 {
-		s.errorf("internal error: no fields in evalChainNode")
-	}
-	if chain.Node.Type() == parse.NodeNil {
-		s.errorf("indirection through explicit nil in %s", chain)
-	}
-	// (pipe).Field1.Field2 has pipe as .Node, fields as .Field. Eval the pipeline, then the fields.
-	pipe := s.evalArg(dot, nil, chain.Node)
-	return s.evalFieldChain(dot, pipe, chain, chain.Field, args, final)
-}
-
-func (s *state) evalVariableNode(dot reflect.Value, variable *parse.VariableNode, args []parse.Node, final reflect.Value) reflect.Value {
-	// $x.Field has $x as the first ident, Field as the second. Eval the var, then the fields.
-	s.at(variable)
-	value := s.varValue(variable.Ident[0])
-	if len(variable.Ident) == 1 {
-		//		s.notAFunction(args, final)
-		return value
-	}
-	return s.evalFieldChain(dot, value, variable, variable.Ident[1:], args, final)
 }
 
 // evalFieldChain evaluates .X.Y.Z possibly followed by arguments.
@@ -693,14 +665,8 @@ func (s *state) evalArg(dot reflect.Value, typ reflect.Type, n parse.Node) refle
 		s.errorf("cannot assign nil to %s", typ)
 		//	case *parse.FieldNode:
 		//		return s.validateType(s.evalFieldNode(dot, arg, []parse.Node{n}, zero), typ)
-	case *parse.VariableNode:
-		return s.validateType(s.evalVariableNode(dot, arg, nil, zero), typ)
-		//	case *parse.PipeNode:
-		//		return s.validateType(s.evalPipeline(dot, arg), typ)
 	case *parse.IdentifierNode:
 		return s.validateType(s.evalFunction(dot, arg, arg, nil, zero), typ)
-	case *parse.ChainNode:
-		return s.validateType(s.evalChainNode(dot, arg, nil, zero), typ)
 	}
 	switch typ.Kind() {
 	case reflect.Bool:
@@ -811,8 +777,6 @@ func (s *state) evalEmptyInterface(dot reflect.Value, n parse.Node) reflect.Valu
 		return s.idealConstant(n)
 	case *parse.StringNode:
 		return reflect.ValueOf(n.Text)
-	case *parse.VariableNode:
-		return s.evalVariableNode(dot, n, nil, zero)
 	case *parse.ExpressionNode:
 		return s.evalCommand(dot, n)
 	}

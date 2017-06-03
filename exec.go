@@ -212,14 +212,11 @@ func (t *Template) execute(wr io.Writer, data interface{}) (err error) {
 // generating output as they go.
 func (s *state) walk(dot reflect.Value, node parse.Node) {
 	s.at(node)
+
 	switch node := node.(type) {
 	case *parse.ExpressionNode:
-		// Do not pop variables so they persist until next end.
-		// Also, if the action declares variables, don't print the result.
-		//		val := s.evalPipeline(dot, node.Pipe)
-		//		if len(node.Pipe.Decl) == 0 {
-		//			s.printValue(node, val)
-		//		}
+
+		fmt.Println("@!#!@#")
 	case *parse.IfNode:
 		//		s.walkIfOrWith(parse.NodeIf, dot, node.Pipe, node.List, node.ElseList)
 	case *parse.ContentNode:
@@ -234,9 +231,8 @@ func (s *state) walk(dot reflect.Value, node parse.Node) {
 		if _, err := s.wr.Write(node.Text); err != nil {
 			s.writeError(err)
 		}
-		//	case *parse.WithNode:
-		//		s.walkIfOrWith(parse.NodeWith, dot, node.Pipe, node.List, node.ElseList)
 	default:
+		fmt.Println("!@#", node.String())
 		s.errorf("unknown node: %s", node)
 	}
 }

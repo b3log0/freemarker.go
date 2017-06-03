@@ -24,43 +24,20 @@ import (
 )
 
 func ExampleTemplate() {
-	const letter = `
-It's a simple ${thing}.
-`
+	const ftl = "It's a simple ${thing}."
 
-	// Create a new template and parse the letter into it.
-	t, err := template.New("letter").Parse(letter)
+	t, err := template.New("ftl").Parse(ftl)
 	if nil != err {
 		panic(err)
 	}
 
 	dataModel := map[string]interface{}{}
+	dataModel["thing"] = "template engine"
 	err = t.Execute(os.Stdout, dataModel)
 	if err != nil {
 		log.Println("executing template:", err)
 	}
 
 	// Output:
-	// Dear Aunt Mildred,
-	//
-	// It was a pleasure to see you at the wedding.
-	// Thank you for the lovely bone china tea set.
-	//
-	// Best wishes,
-	// Josie
-	//
-	// Dear Uncle John,
-	//
-	// It is a shame you couldn't make it to the wedding.
-	// Thank you for the lovely moleskin pants.
-	//
-	// Best wishes,
-	// Josie
-	//
-	// Dear Cousin Rodney,
-	//
-	// It is a shame you couldn't make it to the wedding.
-	//
-	// Best wishes,
-	// Josie
+	// It's a simple template engine.
 }

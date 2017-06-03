@@ -399,10 +399,19 @@ func (t *Tree) expression(context string) *ExpressionNode {
 
 	for {
 		token := t.nextNonSpace()
+		//fmt.Println(token.String())
 
 		switch token.typ {
 		case itemCloseDirective, itemRightInterpolation:
 			topOperator := operatorStack.pop()
+			if &lowestPrecOperator == topOperator.(*item) {
+				expr := t.newExpression(token.pos, topOperator.(*item).typ)
+				operand := operandStack.pop().(Node)
+				expr.append(operand)
+
+				return expr
+			}
+
 			bottomOperator := operatorStack.pop()
 			if nil == bottomOperator || &lowestPrecOperator != bottomOperator.(*item) {
 				t.unexpected(token, context)

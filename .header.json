@@ -1,7 +1,7 @@
 {
 	"WhatIsThis": "https://github.com/b3log/header",
     "Dir": ".",
-    "Template": "header.txt",
+    "Template": ".header.txt",
     "Includes": [
         "*.go"
     ],

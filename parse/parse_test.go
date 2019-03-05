@@ -22,13 +22,6 @@ import (
 	"testing"
 )
 
-func mkItem(typ itemType, text string) item {
-	return item{
-		typ: typ,
-		val: text,
-	}
-}
-
 func TestStack(t *testing.T) {
 	e1 := mkItem(itemNumber, "1")
 	e2 := mkItem(itemAdd, "+")
